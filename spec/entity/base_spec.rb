@@ -1,4 +1,4 @@
-require './lib/entity/base'
+require './lib/entity_rb/base'
 
 describe Entity::Base do
   describe '.field' do
@@ -90,6 +90,59 @@ describe Entity::Base do
     context 'when key is not passed' do
       it 'raises an ArgumentError' do
         expect{Test.field}.to raise_error(ArgumentError)
+      end
+    end
+  end
+
+  describe '.new' do
+    before do
+      class Test < Entity::Base
+        field :field1
+        field :field2
+      end
+    end
+
+    context 'when all fields exists' do
+      subject { Test.new(field1: 'field1', field2: 'field2') }
+
+      it 'sets field1 value' do
+        expect(subject.field1).to eq 'field1'
+      end
+
+      it 'sets field2 value' do
+        expect(subject.field2).to eq 'field2'
+      end
+    end
+
+    context 'when some fields does not exist' do
+      subject { Test.new(field1: 'field1', field2: 'field2', field3: 'field3', field4: 'field4') }
+
+      it 'sets field1 value' do
+        expect(subject.field1).to eq 'field1'
+      end
+
+      it 'sets field2 value' do
+        expect(subject.field2).to eq 'field2'
+      end
+
+      it 'does not sets field3 value' do
+        expect{subject.field3}.to raise_error(NoMethodError)
+      end
+
+      it 'does not sets field4 value' do
+        expect{subject.field4}.to raise_error(NoMethodError)
+      end
+    end
+
+    context 'when some existing fields are not initialized' do
+      subject { Test.new(field1: 'field1') }
+
+      it 'sets field1 value' do
+        expect(subject.field1).to eq 'field1'
+      end
+
+      it 'sets field2 value' do
+        expect(subject.field2).to be_nil
       end
     end
   end
