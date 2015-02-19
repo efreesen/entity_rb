@@ -16,8 +16,6 @@ module Entity
 
       @fields ||= []
 
-      p @fields
-
       if key.is_a? Array
         key.each do |k|
           begin
