@@ -146,4 +146,63 @@ describe Entity::Base do
       end
     end
   end
+
+  describe '#attributes' do
+    let(:hash) { { field1: 'field1', field2: 'field2', field3: 'field3', field4: 'field4' } }
+
+    before do
+      class TestClass < Entity::Base
+        field :field1
+        field :field2
+        field :field3
+        field :field4
+      end
+    end
+
+    subject { TestClass.new(hash) }
+
+    it "returns a hash with all fields and it's values" do
+      expect(subject.attributes).to eq hash
+    end
+  end
+
+  describe '.fields' do
+    before do
+      class TestClass < Entity::Base
+        field :field1
+        field :field2
+        field :field3
+        field :field4
+      end
+    end
+
+    subject { TestClass.fields }
+
+    it "returns a hash with all fields and it's values" do
+      expect(subject).to eq [:field1, :field2, :field3, :field4]
+    end
+  end
+
+  describe '#fields' do
+    before do
+      class TestClass < Entity::Base
+        field :field1
+        field :field1
+        field :field2
+        field :field2
+        field :field3
+        field :field3
+        field :field4
+        field :field4
+      end
+    end
+
+    subject { TestClass.new.fields }
+
+    it "returns a hash with all fields and it's values" do
+      expect(TestClass).to receive(:fields)
+      
+      subject
+    end
+  end
 end
