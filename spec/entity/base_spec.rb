@@ -1,6 +1,31 @@
 require './lib/entity_rb/base'
 
 describe Entity::Base do
+  after do
+    Object.send(:remove_const, :Test) if Object.const_defined?(:Test)
+    Object.send(:remove_const, :Child) if Object.const_defined?(:Child)
+  end
+
+  describe '.initialize' do
+    before do
+      class Test < Entity::Base
+        field :field1
+      end
+    end
+
+    subject { Test.new(field1: 'field1') }
+
+    it 'sets fields values' do
+      expect(subject.field1).to eq 'field1'
+    end
+
+    it 'calls set_attributes on instance' do
+      expect_any_instance_of(Test).to receive(:set_attributes)
+
+      subject
+    end
+  end
+
   describe '.field' do
     before do
       class Test < Entity::Base
@@ -125,11 +150,11 @@ describe Entity::Base do
         expect(subject.field2).to eq 'field2'
       end
 
-      it 'does not sets field3 value' do
+      it 'does not set field3 value' do
         expect{subject.field3}.to raise_error(NoMethodError)
       end
 
-      it 'does not sets field4 value' do
+      it 'does not set field4 value' do
         expect{subject.field4}.to raise_error(NoMethodError)
       end
     end
@@ -145,13 +170,40 @@ describe Entity::Base do
         expect(subject.field2).to be_nil
       end
     end
+
+    context 'when class has a parent entity' do
+      before do
+        class Test < Entity::Base
+          field :field1
+          field :field2
+        end
+
+        class Child < Test
+          field :field3
+        end
+      end
+
+      subject { Child.new(field1: 'field1', field2: 'field2', field3: 'field3') }
+
+      it 'parent does not inherit Child fields' do
+        expect(Test.fields).to eq [:field1, :field2]
+      end
+
+      it 'has parent fields' do
+        expect(subject.field1).to eq 'field1'
+      end
+
+      it 'has its own fields' do
+        expect(subject.field3).to eq 'field3'
+      end
+    end
   end
 
   describe '#attributes' do
     let(:hash) { { field1: 'field1', field2: 'field2', field3: 'field3', field4: 'field4' } }
 
     before do
-      class TestClass < Entity::Base
+      class Test < Entity::Base
         field :field1
         field :field2
         field :field3
@@ -159,7 +211,7 @@ describe Entity::Base do
       end
     end
 
-    subject { TestClass.new(hash) }
+    subject { Test.new(hash) }
 
     it "returns a hash with all fields and it's values" do
       expect(subject.attributes).to eq hash
@@ -168,7 +220,7 @@ describe Entity::Base do
 
   describe '.fields' do
     before do
-      class TestClass < Entity::Base
+      class Test < Entity::Base
         field :field1
         field :field2
         field :field3
@@ -176,7 +228,7 @@ describe Entity::Base do
       end
     end
 
-    subject { TestClass.fields }
+    subject { Test.fields }
 
     it "returns a hash with all fields and it's values" do
       expect(subject).to eq [:field1, :field2, :field3, :field4]
@@ -185,7 +237,7 @@ describe Entity::Base do
 
   describe '#fields' do
     before do
-      class TestClass < Entity::Base
+      class Test < Entity::Base
         field :field1
         field :field1
         field :field2
@@ -197,10 +249,10 @@ describe Entity::Base do
       end
     end
 
-    subject { TestClass.new.fields }
+    subject { Test.new.fields }
 
     it "returns a hash with all fields and it's values" do
-      expect(TestClass).to receive(:fields)
+      expect(Test).to receive(:fields)
       
       subject
     end
