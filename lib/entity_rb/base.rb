@@ -1,17 +1,25 @@
 module Entity
   class Base
-    def initialize(args={})
-      attributes = {} unless args
+    attr_reader :attributes
 
-      args.each do |key, value|
-        send("#{key}=", value) if fields.include? key.to_sym
-      end
+    def initialize(args={})
+      initialize_attributes(args || {})
 
       set_attributes(args)
     end
 
     def set_attributes(args)
     end
+
+    def attributes=(args)
+      @attributes ||= {}
+
+      args.each do |key, value|
+        set_field(key, value)
+      end
+    end
+
+    alias initialize_attributes attributes=
 
     def to_h
       {}.tap do |hash|
@@ -21,7 +29,6 @@ module Entity
       end
     end
 
-    alias attributes to_h
     alias to_hash to_h
 
     def self.fields
@@ -51,6 +58,15 @@ module Entity
         fields.push key.to_sym unless fields.include?(key.to_sym)
 
         attr_accessor key.to_sym
+      end
+    end
+
+    def set_field(key, value)
+      key = key.to_sym
+
+      if fields.include? key
+        send("#{key}=", value)
+        @attributes[key] = value
       end
     end
 

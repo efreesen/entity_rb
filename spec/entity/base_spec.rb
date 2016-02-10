@@ -257,4 +257,32 @@ describe Entity::Base do
       subject
     end
   end
+
+  describe '#attributes=' do
+    let(:new_attributes) { { field3: 'new field3', field5: 'ignored' } }
+    let(:instance) { Test.new }
+
+    before do
+      class Test < Entity::Base
+        field :field1
+        field :field2
+        field :field3
+        field :field4
+      end
+    end
+
+    subject { instance.attributes = new_attributes }
+
+    it "sets new value to field3" do
+      subject
+
+      expect(instance.field3).to eq 'new field3'
+    end
+
+    it "does not add field5 to the attributes" do
+      subject
+
+      expect(instance.attributes['field5']).to be_nil
+    end
+  end
 end
