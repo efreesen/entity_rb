@@ -45,6 +45,18 @@ describe Entity::Base do
         it 'defines an attribute writer for it' do
           expect(subject).to respond_to(:test_field=)
         end
+
+        it 'writer updates variable' do
+          subject.test_field = 1
+
+          expect(subject.test_field).to eq 1
+        end
+
+        it 'writer updates attributes' do
+          subject.test_field = 1
+
+          expect(subject.attributes[:test_field]).to eq 1
+        end
       end
 
       context 'and is a String' do

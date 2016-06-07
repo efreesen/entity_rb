@@ -57,8 +57,17 @@ module Entity
       else
         fields.push key.to_sym unless fields.include?(key.to_sym)
 
-        attr_accessor key.to_sym
+        attr_reader key.to_sym
+        define_writer(key)
       end
+    end
+
+    def self.define_writer(key)
+      define_method "#{key}=", ->(value){
+        key = __method__[0..-2]
+        attributes[key.to_sym] = value
+        self.instance_variable_set("@#{key}".to_sym, value)
+      }
     end
 
     def set_field(key, value)
